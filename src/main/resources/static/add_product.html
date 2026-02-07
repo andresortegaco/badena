@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publicar Producto - Badena</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f7f6; }
+        .form-container { background: white; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .section-title { border-left: 4px solid #0d6efd; padding-left: 10px; margin-bottom: 20px; color: #0d6efd; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="market.html">
+            <i class="bi bi-journal-bookmark-fill me-2"></i>Badena
+        </a>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link fw-bold" href="dashboard-productos.html"><i class="bi bi-arrow-left-circle me-1"></i>Volver al Inventario</a></li>
+            </ul>
+            <ul class="navbar-nav ms-auto gap-2" id="menuUsuario"></ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="form-container p-4 p-md-5">
+                <form id="formProducto">
+                    <h5 class="section-title fw-bold">Información General</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Nombre del Producto</label>
+                            <input type="text" id="nombre" class="form-control" placeholder="Ej: Café Premium" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Categoría</label>
+                            <select id="idCategoria" class="form-select" required></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Marca</label>
+                            <select id="idMarca" class="form-select" required></select>
+                        </div>
+                    </div>
+
+                    <h5 class="section-title fw-bold">Especificaciones de Producto</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Contenido Neto</label>
+                            <input type="text" id="contenidoNeto" class="form-control" placeholder="Ej: 500">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Unidad</label>
+                            <select id="unidadMedida" class="form-select">
+                                <option value="g">Gramos (g)</option>
+                                <option value="kg">Kilogramos (kg)</option>
+                                <option value="ml">Mililitros (ml)</option>
+                                <option value="lt">Litros (lt)</option>
+                                <option value="un">Unidades (un)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">EAN / Universal</label>
+                            <input type="text" id="codigoUniversal" class="form-control" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">SKU</label>
+                            <input type="text" id="skuVendedor" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <h5 class="section-title fw-bold">Dimensiones y Logística</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Peso (Kg)</label>
+                            <input type="number" step="0.01" id="pesoKg" class="form-control" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Largo (cm)</label>
+                            <input type="number" step="0.1" id="largoCm" class="form-control" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Ancho (cm)</label>
+                            <input type="number" step="0.1" id="anchoCm" class="form-control" value="0">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Alto (cm)</label>
+                            <input type="number" step="0.1" id="altoCm" class="form-control" value="0">
+                        </div>
+                    </div>
+
+                    <h5 class="section-title fw-bold">Marketing y Multimedia</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Descripción de Marketing</label>
+                            <textarea id="descripcionMarketing" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Ficha Técnica</label>
+                            <textarea id="descripcionTecnica" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Imágenes (Máximo 5)</label>
+                            <input type="file" id="fotos" class="form-control" multiple accept="image/*">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 btn-lg rounded-pill shadow fw-bold">
+                        <i class="bi bi-cloud-arrow-up-fill me-2"></i>Publicar Producto
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    const usuarioActivo = JSON.parse(localStorage.getItem('usuario'));
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Validacion de tipoUsuario
+        if (!usuarioActivo || !usuarioActivo.tipoUsuario) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Convertir a mayusculas para evitar errores de escritura en la BD
+        const rol = usuarioActivo.tipoUsuario.toUpperCase();
+
+        if (rol === 'CORPORATION' || rol === 'PUBLISHER') {
+            console.log("Acceso autorizado para:", rol);
+            cargarMenu();
+            cargarCategorias();
+            cargarMarcas();
+        } else {
+            console.error("Acceso denegado. Rol no permitido:", rol);
+            window.location.href = 'login.html';
+        }
+    });
+
+    function cargarMenu() {
+        const menu = document.getElementById('menuUsuario');
+        if (!menu) return;
+        menu.innerHTML = `
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                    <div class="text-end me-2 d-none d-sm-block">
+                        <div class="fw-bold" style="font-size: 0.85rem;">${usuarioActivo.nombre}</div>
+                        <small class="opacity-75" style="font-size: 0.7rem;">${usuarioActivo.tipoUsuario}</small>
+                    </div>
+                    <i class="bi bi-person-circle fs-3"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                    <li><h6 class="dropdown-header text-primary">${usuarioActivo.nombreTienda}</h6></li>
+                    <li><a class="dropdown-item" href="/perfil.html"><i class="bi bi-person-vcard me-2"></i>Mi Perfil</a></li>
+                    <li><a class="dropdown-item" href="/market.html"><i class="bi bi-shop-window me-2"></i>Market</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="cerrarSesion()">Cerrar Sesión</a></li>
+                </ul>
+            </li>`;
+    }
+
+    function cerrarSesion() {
+        localStorage.removeItem('usuario');
+        window.location.href = 'login.html';
+    }
+
+    async function cargarCategorias() {
+        try {
+            const res = await fetch('http://localhost:8080/api/v1/categorias');
+            const data = await res.json();
+            const select = document.getElementById('idCategoria');
+            if (select) {
+                select.innerHTML = '<option value="">Seleccionar...</option>';
+                data.forEach(c => select.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
+            }
+        } catch (e) { console.error("Error categorías:", e); }
+    }
+
+    async function cargarMarcas() {
+        try {
+            const res = await fetch(`http://localhost:8080/api/v1/marcas/tienda/${usuarioActivo.idTienda}`);
+            const data = await res.json();
+            const select = document.getElementById('idMarca');
+            if (select) {
+                select.innerHTML = '<option value="">Seleccionar...</option>';
+                data.forEach(m => select.innerHTML += `<option value="${m.id}">${m.nombre}</option>`);
+            }
+        } catch (e) { console.error("Error marcas:", e); }
+    }
+
+    document.getElementById('formProducto').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Validacion del JSON
+        const prodJson = {
+            nombre: document.getElementById('nombre').value,
+            idMarca: parseInt(document.getElementById('idMarca').value),
+            idCategoria: parseInt(document.getElementById('idCategoria').value),
+            skuVendedor: document.getElementById('skuVendedor').value,
+            codigoUniversal: document.getElementById('codigoUniversal').value,
+            descripcionMarketing: document.getElementById('descripcionMarketing').value,
+            descripcionTecnica: document.getElementById('descripcionTecnica').value,
+            contenidoNeto: document.getElementById('contenidoNeto').value,
+            unidadMedida: document.getElementById('unidadMedida').value,
+            idTienda: parseInt(usuarioActivo.idTienda), 
+            pesoKg: parseFloat(document.getElementById('pesoKg').value) || 0,
+            largoCm: parseFloat(document.getElementById('largoCm').value) || 0,
+            anchoCm: parseFloat(document.getElementById('anchoCm').value) || 0,
+            altoCm: parseFloat(document.getElementById('altoCm').value) || 0
+        };
+
+        const formData = new FormData();
+        formData.append("producto", new Blob([JSON.stringify(prodJson)], { type: "application/json" }));
+        
+        const fotosInput = document.getElementById('fotos');
+        for (let i = 0; i < Math.min(fotosInput.files.length, 5); i++) {
+            formData.append("imagenes", fotosInput.files[i]);
+        }
+
+        try {
+            const res = await fetch('http://localhost:8080/api/v1/productos/con-imagenes', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (res.ok) {
+                Swal.fire('¡Éxito!', 'Producto publicado correctamente', 'success')
+                    .then(() => window.location.href = 'dashboard-productos.html');
+            } else {
+                const err = await res.json();
+                Swal.fire('Error', err.error || 'No se pudo guardar', 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'No hay conexión con el servidor', 'error');
+        }
+    });
+</script>
+
+</body>
+</html>

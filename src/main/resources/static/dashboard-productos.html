@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Inventario - Badena</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+         <a class="navbar-brand fw-bold d-flex align-items-center" href="market.html">
+            <i class="bi bi-journal-bookmark-fill me-2"></i>Badena
+        </a>
+        <div class="d-none d-md-block position-absolute start-50 translate-middle-x">
+            <span class="navbar-text text-white fw-bold fs-4 text-uppercase" id="tiendaCentral" style="letter-spacing: 1.5px;">
+                </span>
+        </div>
+               
+        <div class="ms-auto" id="menuUsuario"></div>
+    </div>
+    
+</nav>
+
+<div class="container mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Gestión de Inventario</h2>
+            <p class="text-muted" id="nombreTiendaSub"></p>
+        </div>
+        <a href="add_product.html" class="btn btn-warning fw-bold"><i class="bi bi-plus-lg me-1"></i>Nuevo Producto</a>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-dark text-white">
+                        <tr>
+                            <th class="ps-3">Producto</th>
+                            <th>EAN / Código</th>
+                            <th>Categoría</th>
+                            <th>Marca</th>
+                            <th class="text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaProductos">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+
+    const usuarioActivo = JSON.parse(localStorage.getItem('usuario'));
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log("Validando sesión para:", usuarioActivo?.tipoUsuario);
+
+        if (!usuarioActivo || (usuarioActivo.tipoUsuario !== 'CORPORATION' && usuarioActivo.tipoUsuario !== 'PUBLISHER')) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        const elTiendaCentral = document.getElementById('tiendaCentral');
+        if (elTiendaCentral) {
+            elTiendaCentral.innerText = usuarioActivo.nombreTienda || "Mi Tienda";
+        }
+        document.getElementById('nombreTiendaSub').innerText = usuarioActivo.nombreTienda || "";
+
+        cargarMenu();
+
+        try {
+            await cargarCategorias();
+            await cargarMarcas();
+        } catch (error) {
+            console.warn("Aviso: No se pudieron cargar categorías/marcas, pero intentaremos cargar los productos.");
+        }
+
+        cargarProductosTienda();
+    });
+
+    function cargarMenu() {
+        document.getElementById('menuUsuario').innerHTML = `
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                    <div class="text-end me-2 d-none d-sm-block">
+                        <div class="fw-bold" style="font-size: 0.85rem;">${usuarioActivo.nombre}</div>
+                        <small class="opacity-75" style="font-size: 0.7rem;">${usuarioActivo.tipoUsuario}</small>
+                    </div>
+                    <i class="bi bi-person-circle fs-3"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                    <li><h6 class="dropdown-header text-primary">${usuarioActivo.nombreTienda}</h6></li>
+                    <li><a class="dropdown-item" href="/perfil.html"><i class="bi bi-person-vcard me-2"></i>Mi Perfil</a></li>
+                    <li><a class="dropdown-item" href="/market.html"><i class="bi bi-shop-window me-2"></i>Market</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item text-danger" href="#" onclick="cerrarSesion()">Cerrar Sesión</a></li>
+                </ul>
+            </li>`;
+    }
+
+    async function cargarCategorias() {
+        const res = await fetch('http://localhost:8080/api/v1/categorias');
+        return await res.json();
+    }
+
+    async function cargarMarcas() {
+        const res = await fetch(`http://localhost:8080/api/v1/marcas/tienda/${usuarioActivo.idTienda}`);
+        return await res.json();
+    }
+
+    async function cargarProductosTienda() {
+        try {
+            const res = await fetch(`http://localhost:8080/api/v1/productos/tienda/${usuarioActivo.idTienda}`);
+            const productos = await res.json();
+            const tabla = document.getElementById('tablaProductos');
+            
+            if (productos.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="5" class="text-center py-5">No tienes productos publicados.</td></tr>';
+                return;
+            }
+
+            tabla.innerHTML = productos.map(p => `
+                <tr>
+                    <td class="ps-3">
+                        <div class="d-flex align-items-center">
+                            <img src="${p.imagenes && p.imagenes[0]?.urlImagen ? 'http://localhost:8080' + p.imagenes[0].urlImagen : 'https://via.placeholder.com/50'}" 
+                                 class="rounded me-2" style="width: 45px; height: 45px; object-fit: cover;">
+                            <span class="fw-bold">${p.nombreProducto || p.nombre || 'Sin nombre'}</span>
+                        </div>
+                    </td>
+                    <td><code>${p.codigoUniversal || '---'}</code></td>
+                    <td><span class="badge bg-light text-dark border">${p.categoria?.nombre || p.categoria || 'N/A'}</span></td>
+                    <td>${p.marca?.nombre || p.nombreMarca || p.marca || 'N/A'}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-primary" onclick="editar('${p.codigoUniversal}')">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (e) {
+            console.error("Error al cargar la tabla de productos:", e);
+        }
+    }
+
+    function editar(ean) {
+        window.location.href = `edit_product.html?ean=${ean}`;
+    }
+
+    function cerrarSesion() {
+        localStorage.removeItem('usuario');
+        window.location.href = 'login.html';
+    }
+</script>
+</body>
+</html>
