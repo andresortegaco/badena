@@ -11,5 +11,5 @@ public class LoginDTO {
     public void setPassword(String password) { this.password = password; }
     public String getTipoUsuario() {return tipoUsuario; }
     public void setTipoUsuario(String tipoUsuario) {this.tipoUsuario = tipoUsuario;}
-    
+
 }
