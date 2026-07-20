@@ -178,12 +178,38 @@
         try {
             const res = await fetch('http://localhost:8080/api/v1/categorias');
             const data = await res.json();
-            const select = document.getElementById('idCategoria');
+            const select = document.getElementById('idCategoria'); //
             if (select) {
                 select.innerHTML = '<option value="">Seleccionar...</option>';
-                data.forEach(c => select.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
+                // Llamamos a la nueva función para que construya las opciones anidadas
+                select.innerHTML += construirArbolOpciones(data, 0);
             }
         } catch (e) { console.error("Error categorías:", e); }
+    }
+
+    /**
+     * Función recursiva que recorre el árbol de categorías.
+     * Si encuentra subcategorías, se llama a sí misma añadiendo sangría.
+     */
+    function construirArbolOpciones(categorias, nivel) {
+        let html = '';
+        
+        // Creamos sangría HTML (&nbsp;) dependiendo de qué tan profunda sea la subcategoría
+        const sangria = '&nbsp;&nbsp;&nbsp;&nbsp;'.repeat(nivel);
+        // Añadimos un pequeño indicador visual tipo "rama" si no es una categoría principal
+        const rama = nivel > 0 ? '└ ' : '';
+
+        categorias.forEach(cat => {
+            // Añadimos la categoría actual al select
+            html += `<option value="${cat.id}">${sangria}${rama}${cat.nombre}</option>`;
+            
+            // Si tiene subcategorías (hijos), las procesamos aumentando el nivel
+            if (cat.subcategorias && cat.subcategorias.length > 0) {
+                html += construirArbolOpciones(cat.subcategorias, nivel + 1);
+            }
+        });
+        
+        return html;
     }
 
     async function cargarMarcas() {

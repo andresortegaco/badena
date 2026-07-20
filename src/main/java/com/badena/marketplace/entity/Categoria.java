@@ -14,10 +14,11 @@ public class Categoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relacion de categorias
+    // Relación hacia la categoría padre (Subcategoría -> Categoría Principal)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_padre")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnore // Se añadió aquí para evitar el bucle infinito al generar la respuesta en la API
     private Categoria padre;
 
     @Column(nullable = false, length = 100)
@@ -26,9 +27,9 @@ public class Categoria {
     @Column(nullable = false, unique = true, length = 100)
     private String slug;
 
-    // Relacin de subcategorias
+    // Relación hacia las subcategorías (Categoría Principal -> Subcategorías)
     @OneToMany(mappedBy = "padre", cascade = CascadeType.ALL)
-    @JsonIgnore
+    // Se eliminó el @JsonIgnore de aquí para que el frontend reciba las subcategorías
     private List<Categoria> subcategorias;
 
     public Categoria() { }
