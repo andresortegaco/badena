@@ -315,4 +315,14 @@ public class ProductoController {
 
 
 
+
+            // para las pruebas con Jmeter cambia el tipo de dato que recibe el método POST para que apunte a la clase:
+            //@PostMapping
+            //public ResponseEntity<ProductoDTO> crearProducto(@RequestBody ProductoRegistroDTO request) {
+            //    ProductoDTO nuevoProducto = productoService.crearProducto(request);
+            //    return ResponseEntity.status(HttpStatus.CREATED).body(nuevoProducto);
+            //}
+
+
+
 }

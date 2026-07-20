@@ -10,7 +10,8 @@ import com.badena.marketplace.entity.Producto;
 import com.badena.marketplace.entity.Tienda;
 import com.badena.marketplace.repository.ProductoRepository; 
 import com.badena.marketplace.repository.TiendaRepository;
-import com.badena.marketplace.dto.*;;
+import com.badena.marketplace.dto.*;
+
 
 @Service
 public class ProductoServiceManager implements ProductService {
