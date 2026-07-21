@@ -161,10 +161,11 @@
 <section class="py-5 bg-light">
     <div class="container">
         <h2 class="text-center section-title">Marcas Destacadas</h2>
-        <div class="row g-3" id="gridMarcas">
-            <div class="col-6 col-md-2">
-                <div class="logo-card" style="border-radius: 12px; height: 120px; width: 100%;">
-                    <img src="https://via.placeholder.com/100x50?text=Marca+1" alt="Marca 1" style="border-radius: 0; object-fit: contain;">
+        <!-- CONTENEDOR DINÁMICO PARA LAS MARCAS -->
+        <div class="row g-4 justify-content-center" id="gridMarcas">
+            <div class="col-12 text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando marcas...</span>
                 </div>
             </div>
         </div>
@@ -212,6 +213,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         cargarFabricantes();
+        cargarMarcasDestacadas();
     });
 
     async function cargarFabricantes() {
@@ -246,6 +248,44 @@
             document.getElementById('carouselFabricantes').innerHTML = '<p class="text-center w-100 text-muted">No se pudo conectar con el servidor.</p>';
         }
     }
+
+
+    // NUEVA FUNCIÓN PARA CARGAR LAS MARCAS DESTACADAS CON SUS FOTOS
+    async function cargarMarcasDestacadas() {
+        try {
+            const res = await fetch('http://localhost:8080/api/v1/marcas');
+            const grid = document.getElementById('gridMarcas');
+
+            if (!res.ok) {
+                grid.innerHTML = '<p class="text-center w-100 text-danger">Error al cargar las marcas.</p>';
+                return;
+            }
+
+            const marcas = await res.json();
+            
+            // Filtramos únicamente las marcas que tengan un archivo de logo registrado
+            const marcasConLogo = marcas.filter(m => m.logo != null && m.logo.trim() !== '');
+
+            if (marcasConLogo.length === 0) {
+                grid.innerHTML = '<p class="text-center w-100 text-muted">Próximamente marcas destacadas...</p>';
+                return;
+            }
+
+            // Generamos las tarjetas de forma responsiva en la grilla
+            grid.innerHTML = marcasConLogo.map(m => `
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center">
+                    <div class="logo-card shadow-sm" style="border-radius: 15px; height: 110px; width: 110px;" title="${m.nombre}">
+                        <img src="http://localhost:8080/uploads/${m.logo}" alt="${m.nombre}" style="border-radius: 12px; object-fit: cover;">
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (error) {
+            console.error("Error cargando marcas destacadas:", error);
+            document.getElementById('gridMarcas').innerHTML = '<p class="text-center w-100 text-muted">No se pudo conectar con el servidor.</p>';
+        }
+}
+
 </script>
 </body>
 </html>

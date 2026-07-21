@@ -306,46 +306,95 @@
 
     // Funciones cargarMarcas, nuevaMarca, cargarPublishers se mantienen igual ...
     async function cargarMarcas() {
-        try {
-            const res = await fetch(`http://localhost:8080/api/v1/marcas/tienda/${usuario.idTienda}`);
-            const marcas = await res.json();
-            const lista = document.getElementById('listaMarcas');
-            
-            if (marcas.length === 0) {
-                lista.innerHTML = '<div class="alert alert-light border">No tienes marcas registradas.</div>';
-                return;
-            }
+            try {
+                const res = await fetch(`http://localhost:8080/api/v1/marcas/tienda/${usuario.idTienda}`);
+                const marcas = await res.json();
+                const lista = document.getElementById('listaMarcas');
+                
+                if (marcas.length === 0) {
+                    lista.innerHTML = '<div class="alert alert-light border">No tienes marcas registradas.</div>';
+                    return;
+                }
 
-            lista.innerHTML = marcas.map(m => `
-                <div class="list-group-item d-flex justify-content-between align-items-center shadow-sm mb-1 rounded">
-                    <span><i class="bi bi-tag-fill text-warning me-2"></i>${m.nombre}</span>
-                    <span class="badge bg-light text-dark border">ID: ${m.id}</span>
-                </div>
-            `).join('');
-        } catch (e) { console.error(e); }
-    }
-
-    async function nuevaMarca() {
-        const { value: nombre } = await Swal.fire({
-            title: 'Nombre de la nueva marca',
-            input: 'text',
-            showCancelButton: true,
-            confirmButtonColor: '#0d6efd'
-        });
-
-        if (nombre) {
-            const res = await fetch('http://localhost:8080/api/v1/marcas', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre, idTienda: usuario.idTienda })
-            });
-            if (res.ok) { 
-                Swal.fire('¡Éxito!', 'Marca creada correctamente', 'success'); 
-                cargarMarcas(); 
+                lista.innerHTML = marcas.map(m => `
+                    <div class="list-group-item d-flex justify-content-between align-items-center shadow-sm mb-2 rounded bg-white p-2">
+                        <div class="d-flex align-items-center">
+                            ${m.foto || m.logo ? 
+                                `<img src="http://localhost:8080/uploads/${m.foto || m.logo}" class="rounded-circle me-3 border" style="width: 45px; height: 45px; object-fit: cover;">` :
+                                `<div class="bg-light rounded-circle me-3 d-flex align-items-center justify-content-center border" style="width: 45px; height: 45px;"><i class="bi bi-tag-fill text-muted"></i></div>`
+                            }
+                            <div>
+                                <span class="fw-bold text-dark">${m.nombre}</span>
+                                <div class="small text-muted">ID: ${m.id}</div>
+                            </div>
+                        </div>
+                        <span class="badge bg-light text-dark border">Activa</span>
+                    </div>
+                `).join('');
+            } catch (e) { 
+                console.error(e); 
+                document.getElementById('listaMarcas').innerHTML = '<div class="alert alert-danger">Error al cargar las marcas.</div>';
             }
         }
-    }
 
+
+    async function nuevaMarca() {
+            const { value: formValues } = await Swal.fire({
+                title: 'Registrar Nueva Marca',
+                html:
+                    '<input id="swal-input-nombre" class="swal2-input" placeholder="Nombre de la marca">' +
+                    '<textarea id="swal-input-descripcion" class="swal2-textarea" placeholder="Descripción opcional de la marca"></textarea>' +
+                    '<label class="form-label text-muted small mt-2 d-block text-start px-3">Logo o Foto de la Marca</label>' +
+                    '<input type="file" id="swal-input-foto" class="swal2-file" accept="image/*">',
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar Marca',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#0d6efd',
+                preConfirm: () => {
+                    const nombre = document.getElementById('swal-input-nombre').value;
+                    const descripcion = document.getElementById('swal-input-descripcion').value;
+                    const foto = document.getElementById('swal-input-foto').files[0];
+                    
+                    if (!nombre) {
+                        Swal.showValidationMessage('El nombre de la marca es obligatorio');
+                        return false;
+                    }
+                    return { nombre: nombre, descripcion: descripcion, foto: foto };
+                }
+            });
+
+            if (formValues) {
+                const formData = new FormData();
+                formData.append('nombre', formValues.nombre);
+                formData.append('descripcion', formValues.descripcion || '');
+                formData.append('idTienda', usuario.idTienda);
+                if (formValues.foto) {
+                    formData.append('foto', formValues.foto);
+                }
+
+                try {
+                    const res = await fetch('http://localhost:8080/api/v1/marcas', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (res.ok) { 
+                        Swal.fire('¡Éxito!', 'Marca creada correctamente', 'success'); 
+                        cargarMarcas(); 
+                    } else {
+                        const errData = await res.json().catch(() => ({}));
+                        Swal.fire('Error', errData.error || 'No se pudo crear la marca', 'error');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire('Error', 'No hay conexión con el servidor', 'error');
+                }
+            }
+        }
+
+
+        
     async function cargarPublishers() {
         try {
             const res = await fetch(`http://localhost:8080/api/v1/usuarios/tienda/${usuario.idTienda}/publishers`);
