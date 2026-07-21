@@ -3,22 +3,24 @@ package com.badena.marketplace.entity;
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
 
 @Entity
 @Table(name = "categorias")
+// 1. EL CAMBIO VITAL: Proteger la clase entera para que Producto pueda serializarla sin errores
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Categoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Relación hacia la categoría padre (Subcategoría -> Categoría Principal)
+    // Relación hacia la categoría padre
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_padre")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-    @JsonIgnore // Se añadió aquí para evitar el bucle infinito al generar la respuesta en la API
+    @JsonIgnore // Evita el bucle infinito hacia el padre
     private Categoria padre;
 
     @Column(nullable = false, length = 100)
@@ -27,9 +29,9 @@ public class Categoria {
     @Column(nullable = false, unique = true, length = 100)
     private String slug;
 
-    // Relación hacia las subcategorías (Categoría Principal -> Subcategorías)
+    // Relación hacia las subcategorías
     @OneToMany(mappedBy = "padre", cascade = CascadeType.ALL)
-    // Se eliminó el @JsonIgnore de aquí para que el frontend reciba las subcategorías
+    @JsonInclude(JsonInclude.Include.NON_EMPTY) // Optimización: Solo lo incluye en el JSON si tiene subcategorías
     private List<Categoria> subcategorias;
 
     public Categoria() { }

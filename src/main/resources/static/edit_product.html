@@ -179,22 +179,45 @@
         } catch (e) { console.error("Error cargando producto:", e); }
     }
 
+    // AJUSTADO: Se limpia el texto de prefijos visuales antes de comparar
     function seleccionarOpcionPorTexto(idSelect, texto) {
         const select = document.getElementById(idSelect);
+        if (!texto) return;
+        
         for(let opt of select.options) {
-            if(opt.text === texto) {
+            const textoLimpio = opt.text.replace('└ ', '').trim();
+            if(textoLimpio === texto.trim()) {
                 opt.selected = true;
                 break;
             }
         }
     }
 
+    // AJUSTADO: Se incorpora la lógica recursiva para las subcategorías
     async function cargarCategorias() {
-        const res = await fetch('http://localhost:8080/api/v1/categorias');
-        const data = await res.json();
-        const select = document.getElementById('idCategoria');
-        select.innerHTML = '<option value="">Seleccionar...</option>';
-        data.forEach(c => select.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
+        try {
+            const res = await fetch('http://localhost:8080/api/v1/categorias');
+            const data = await res.json();
+            const select = document.getElementById('idCategoria');
+            select.innerHTML = '<option value="">Seleccionar...</option>';
+            select.innerHTML += construirArbolOpciones(data, 0);
+        } catch (e) { console.error("Error categorías:", e); }
+    }
+
+    // NUEVO: Función recursiva para dibujar el árbol con sangrías
+    function construirArbolOpciones(categorias, nivel) {
+        let html = '';
+        const sangria = '&nbsp;&nbsp;&nbsp;&nbsp;'.repeat(nivel);
+        const rama = nivel > 0 ? '└ ' : '';
+
+        categorias.forEach(cat => {
+            html += `<option value="${cat.id}">${sangria}${rama}${cat.nombre}</option>`;
+            if (cat.subcategorias && cat.subcategorias.length > 0) {
+                html += construirArbolOpciones(cat.subcategorias, nivel + 1);
+            }
+        });
+        
+        return html;
     }
 
     async function cargarMarcas() {

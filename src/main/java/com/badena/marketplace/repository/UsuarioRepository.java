@@ -32,6 +32,10 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     long contarPorTiendaAndTipo(@Param("idTienda") Long idTienda, @Param("tipo") TipoUsuario tipo);
     List<Usuario> findByTiendaIdAndTipoUsuario(Long tiendaId, String tipoUsuario);
 
+
+
+    // 
+    List<Usuario> findByTipo(com.badena.marketplace.entity.TipoUsuario tipo);
 }
 
    

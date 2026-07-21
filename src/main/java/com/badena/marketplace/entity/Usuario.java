@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
@@ -32,6 +31,10 @@ public class Usuario {
     private TipoUsuario tipo = TipoUsuario.CORPORATION;
 
     private String tipoUsuario;
+
+    // NUEVO CAMPO: Para almacenar la ruta o URL de la foto de perfil
+    @Column(name = "foto_perfil", length = 500)
+    private String fotoPerfil;
 
     @Column(name = "fecha_registro")
     private LocalDateTime fechaRegistro;
@@ -62,10 +65,10 @@ public class Usuario {
     public Tienda getTienda() { return tienda; }
     public void setTienda(Tienda tienda) { this.tienda = tienda; }
 
-    public String getTipoUsuario() {
-        return tipoUsuario;   }
+    public String getTipoUsuario() { return tipoUsuario; }
+    public void setTipoUsuario(String tipoUsuario) { this.tipoUsuario = tipoUsuario; }
 
-    public void setTipoUsuario(String tipoUsuario) { 
-    this.tipoUsuario = tipoUsuario;   }
-    
+    // NUEVOS GETTERS Y SETTERS PARA LA FOTO
+    public String getFotoPerfil() { return fotoPerfil; }
+    public void setFotoPerfil(String fotoPerfil) { this.fotoPerfil = fotoPerfil; }
 }

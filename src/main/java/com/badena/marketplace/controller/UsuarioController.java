@@ -4,12 +4,13 @@ import com.badena.marketplace.entity.Usuario;
 import com.badena.marketplace.entity.Tienda;
 import com.badena.marketplace.repository.UsuarioRepository;
 import com.badena.marketplace.repository.TiendaRepository;
+import com.badena.marketplace.services.UsuarioService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -27,12 +28,15 @@ public class UsuarioController {
     @Autowired
     private TiendaRepository tiendaRepository;
 
-    //Obtener los datos de un usuario
+    @Autowired
+    private UsuarioService usuarioService; // NUEVA INYECCIÓN
+
+    // Obtener los datos de un usuario
     @GetMapping("/{id}")
     public ResponseEntity<?> obtenerPerfil(@PathVariable Long id) {
         if (id == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "El ID de usuario es obligatorio"));
-            }
+            return ResponseEntity.badRequest().body(Map.of("error", "El ID de usuario es obligatorio"));
+        }
 
         return usuarioRepository.findById(id)
                 .map(ResponseEntity::ok)
@@ -54,6 +58,7 @@ public class UsuarioController {
                     respuesta.put("email", user.getEmail());
                     respuesta.put("tipo", user.getTipo()); // Nivel 1
                     respuesta.put("tipoUsuario", user.getTipoUsuario()); // Nivel 2 (PUBLISHER)
+                    respuesta.put("fotoPerfil", user.getFotoPerfil()); // NUEVO: Enviar foto al frontend
                     
                     if (user.getTienda() != null) {
                         respuesta.put("idTienda", user.getTienda().getId());
@@ -70,10 +75,6 @@ public class UsuarioController {
                                 .body(Map.of("error", "El correo no está registrado")));
     }
 
-
-
-
-
     // Listar los publicadores de una tienda (Solo para CORPORATION)
     @GetMapping("/tienda/{tiendaId}/publishers")
     public ResponseEntity<List<Usuario>> listarPublishers(@PathVariable Long tiendaId) {
@@ -82,106 +83,133 @@ public class UsuarioController {
 
     // Crear un Publisher (Asociado a la tienda del Corporation)
     @PostMapping("/crear-publisher")
-        public ResponseEntity<?> crearPublisher(@RequestBody Map<String, String> payload) {
-            try {
-                Usuario nuevoPub = new Usuario();
-                
-                // Asignar los datos del JSON a la entidad
-                nuevoPub.setNombre(payload.get("nombre"));
-                nuevoPub.setEmail(payload.get("email"));
-                nuevoPub.setPassword(payload.get("password"));
-                
-                // Campos de control de la base de datos
-                nuevoPub.setTipoUsuario("PUBLISHER");
-                nuevoPub.setTipoUsuario("PUBLISHER");
-                nuevoPub.setFechaRegistro(LocalDateTime.now());
+    public ResponseEntity<?> crearPublisher(@RequestBody Map<String, String> payload) {
+        try {
+            Usuario nuevoPub = new Usuario();
+            
+            // Asignar los datos del JSON a la entidad
+            nuevoPub.setNombre(payload.get("nombre"));
+            nuevoPub.setEmail(payload.get("email"));
+            nuevoPub.setPassword(payload.get("password"));
+            
+            // Campos de control de la base de datos
+            nuevoPub.setTipoUsuario("PUBLISHER");
+            nuevoPub.setFechaRegistro(LocalDateTime.now());
 
-                // Vincular la tienda de la empresa
-                Long idTienda = Long.parseLong(payload.get("idTienda"));
-                Tienda tienda = tiendaRepository.findById(idTienda)
-                        .orElseThrow(() -> new RuntimeException("Tienda no encontrada"));
-                nuevoPub.setTienda(tienda);
+            // Vincular la tienda de la empresa
+            Long idTienda = Long.parseLong(payload.get("idTienda"));
+            Tienda tienda = tiendaRepository.findById(idTienda)
+                    .orElseThrow(() -> new RuntimeException("Tienda no encontrada"));
+            nuevoPub.setTienda(tienda);
 
-                usuarioRepository.save(nuevoPub);
+            usuarioRepository.save(nuevoPub);
 
-                return ResponseEntity.ok(Map.of("mensaje", "Publicador creado con éxito"));
-            } catch (Exception e) {
-                return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-            }
+            return ResponseEntity.ok(Map.of("mensaje", "Publicador creado con éxito"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
 
+    /**
+     * NUEVO ENDPOINT: Recibe FormData con la foto (MultipartFile) y/o la nueva contraseña
+     */
+    @PutMapping("/{id}/actualizar")
+    public ResponseEntity<?> actualizarPerfil(
+            @PathVariable Long id,
+            @RequestParam(required = false) String password,
+            @RequestParam(required = false) MultipartFile foto) {
+        try {
+            Usuario usuarioActualizado = usuarioService.actualizarPerfil(id, password, foto);
+            return ResponseEntity.ok(usuarioActualizado);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Error al actualizar el perfil: " + e.getMessage()));
+        }
+    }
 
     @PutMapping("/actualizar-perfil/{id}")
-        public ResponseEntity<?> actualizarPerfil(@PathVariable Long id, @RequestBody Map<String, String> datos) {
+    public ResponseEntity<?> actualizarPerfilAntiguo(@PathVariable Long id, @RequestBody Map<String, String> datos) {
 
-            if (id == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "El ID de usuario es obligatorio"));
-            }
+        if (id == null) {
+            return ResponseEntity.badRequest().body(Map.of("error", "El ID de usuario es obligatorio"));
+        }
 
-            try {
+        try {
 
-                Usuario usuario = usuarioRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            Usuario usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-                // para actualizar la contraseña
-                String nuevaClave = datos.get("password");
-                
-                if (nuevaClave != null && !nuevaClave.trim().isEmpty()) {
-                    usuario.setPassword(nuevaClave); 
-                    usuarioRepository.save(usuario);
-                    
-                    return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada correctamente"));
-                } else {
-                    return ResponseEntity.badRequest().body(Map.of("error", "La contraseña no puede estar vacía"));
-                }
-
-            } catch (Exception e) {
-
-                return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-            }
-        } 
-
-
-        
-        @PutMapping("/update-pass")
-        public ResponseEntity<?> actualizarPassword(@RequestBody Map<String, Object> payload) {
-            try {
-                // se traen y validan datos del JSON
-                if (!payload.containsKey("id") || !payload.containsKey("password")) {
-                    return ResponseEntity.badRequest().body(Map.of("error", "Faltan datos obligatorios"));
-                }
-
-                Long id = Long.valueOf(payload.get("id").toString());
-                String nuevaPass = payload.get("password").toString();
-
-                if (nuevaPass.trim().isEmpty()) {
-                    return ResponseEntity.badRequest().body(Map.of("error", "La contraseña no puede estar vacía"));
-                }
-
-                // Buscar el usuario en la base de datos
-                Usuario usuario = usuarioRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
-
-                //Actualizar la contraseña
-                usuario.setPassword(nuevaPass); 
-                
-                //Guardar cambios.
+            // para actualizar la contraseña
+            String nuevaClave = datos.get("password");
+            
+            if (nuevaClave != null && !nuevaClave.trim().isEmpty()) {
+                usuario.setPassword(nuevaClave); 
                 usuarioRepository.save(usuario);
-
-                System.out.println("Contraseña actualizada para el usuario: " + usuario.getEmail());
                 
                 return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada correctamente"));
-
-            } catch (Exception e) {
-                System.err.println("Error al actualizar pass: " + e.getMessage());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(Map.of("error", "Error interno al procesar la solicitud"));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("error", "La contraseña no puede estar vacía"));
             }
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
-        
+    } 
+
+    @PutMapping("/update-pass")
+    public ResponseEntity<?> actualizarPassword(@RequestBody Map<String, Object> payload) {
+        try {
+            // se traen y validan datos del JSON
+            if (!payload.containsKey("id") || !payload.containsKey("password")) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Faltan datos obligatorios"));
+            }
+
+            Long id = Long.valueOf(payload.get("id").toString());
+            String nuevaPass = payload.get("password").toString();
+
+            if (nuevaPass.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "La contraseña no puede estar vacía"));
+            }
+
+            // Buscar el usuario en la base de datos
+            Usuario usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+
+            //Actualizar la contraseña
+            usuario.setPassword(nuevaPass); 
+            
+            //Guardar cambios.
+            usuarioRepository.save(usuario);
+
+            System.out.println("Contraseña actualizada para el usuario: " + usuario.getEmail());
+            
+            return ResponseEntity.ok(Map.of("mensaje", "Contraseña actualizada correctamente"));
+
+        } catch (Exception e) {
+            System.err.println("Error al actualizar pass: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error interno al procesar la solicitud"));
+        }
+    }
 
 
+    // solicitar la lista de fabricantes
+    @GetMapping("/corporations")
+    public ResponseEntity<List<Usuario>> listarCorporations() {
+        try {
+            // Buscamos a todos los usuarios que sean CORPORATION
+            List<Usuario> corporations = usuarioRepository.findByTipo(com.badena.marketplace.entity.TipoUsuario.CORPORATION);
+            return ResponseEntity.ok(corporations);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 
+
+    @GetMapping
+    public ResponseEntity<List<Usuario>> listarTodos() {
+        return ResponseEntity.ok((List<Usuario>) usuarioRepository.findAll());
+    }
 
 
 

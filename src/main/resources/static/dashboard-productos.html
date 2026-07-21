@@ -16,12 +16,10 @@
         </a>
         <div class="d-none d-md-block position-absolute start-50 translate-middle-x">
             <span class="navbar-text text-white fw-bold fs-4 text-uppercase" id="tiendaCentral" style="letter-spacing: 1.5px;">
-                </span>
+            </span>
         </div>
-               
         <div class="ms-auto" id="menuUsuario"></div>
     </div>
-    
 </nav>
 
 <div class="container mb-5">
@@ -47,7 +45,7 @@
                         </tr>
                     </thead>
                     <tbody id="tablaProductos">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -56,12 +54,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-
     const usuarioActivo = JSON.parse(localStorage.getItem('usuario'));
 
     document.addEventListener('DOMContentLoaded', async () => {
-        console.log("Validando sesión para:", usuarioActivo?.tipoUsuario);
-
         if (!usuarioActivo || (usuarioActivo.tipoUsuario !== 'CORPORATION' && usuarioActivo.tipoUsuario !== 'PUBLISHER')) {
             window.location.href = 'login.html';
             return;

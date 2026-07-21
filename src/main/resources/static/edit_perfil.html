@@ -11,6 +11,8 @@
         .sidebar-link:hover, .sidebar-link.active { background: #0d6efd; color: white !important; }
         .card-custom { border: none; border-radius: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .navbar { z-index: 1050; }
+        /* Nuevo estilo para que la foto sea circular perfecta */
+        .profile-img-sidebar { width: 90px; height: 90px; object-fit: cover; border-radius: 50%; border: 3px solid #0d6efd; }
     </style>
 </head>
 <body class="bg-light">
@@ -37,7 +39,10 @@
         <div class="col-md-3 mb-4">
             <div class="card card-custom p-3 sticky-top" style="top: 90px;">
                 <div class="text-center mb-3">
-                    <i class="bi bi-person-circle display-4 text-primary"></i>
+                    <!-- CONTENEDOR DE LA FOTO MODIFICADO -->
+                    <img id="imgPerfilLateral" src="" class="profile-img-sidebar shadow-sm d-none mb-2" alt="Foto de perfil">
+                    <i id="iconoPerfilLateral" class="bi bi-person-circle display-4 text-primary"></i>
+                    
                     <h5 class="mt-2 fw-bold text-primary mb-0" id="tiendaLateral">Nombre Tienda</h5>
                     <h6 class="mt-2 fw-bold mb-0" id="nombreLateral">Usuario</h6>
                     <small class="text-muted" id="rolBadge">Rol</small>
@@ -64,6 +69,12 @@
                 <h4 class="fw-bold mb-4">Editar Datos Personales</h4>
                 <form id="formPerfil">
                     <div class="row g-3">
+                        <!-- NUEVO INPUT PARA LA FOTO -->
+                        <div class="col-md-12 text-center mb-3">
+                            <label class="form-label fw-bold d-block">Actualizar Foto de Perfil</label>
+                            <input type="file" id="inputFotoPerfil" class="form-control w-50 mx-auto" accept="image/*" onchange="previsualizarFoto(event)">
+                        </div>
+                        
                         <div class="col-md-6">
                             <label class="form-label fw-bold text-muted">Nombre de Usuario (No editable)</label>
                             <input type="text" id="nombreUsuario" class="form-control bg-light" readonly>
@@ -74,20 +85,21 @@
                         </div>
                         <div class="col-md-12">
                             <div class="alert alert-info py-2">
-                                <i class="bi bi-info-circle me-2"></i> Solo puedes actualizar tu contraseña de acceso.
+                                <i class="bi bi-info-circle me-2"></i> Solo puedes actualizar tu contraseña de acceso y foto de perfil.
                             </div>
                             <label class="form-label fw-bold">Nueva Contraseña</label>
                             <input type="password" id="password" class="form-control" placeholder="Escribe la nueva clave aquí">
                         </div>
-                        <div class="col-12 mt-4">
-                            <button class="btn btn-primary px-5 rounded-pill fw-bold shadow">
-                                <i class="bi bi-save me-2"></i>Actualizar Contraseña
+                        <div class="col-12 mt-4 text-center">
+                            <button type="button" class="btn btn-primary px-5 rounded-pill fw-bold shadow" onclick="actualizarPerfil()">
+                                <i class="bi bi-save me-2"></i>Guardar Cambios
                             </button>
                         </div>
                     </div>
                 </form>
             </div>
 
+            <!-- SECCIÓN MARCAS Y PUBLICADORES (Se mantienen igual) -->
             <div id="seccion-marcas" class="card card-custom p-4 mb-4" style="display: none;">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h4 class="fw-bold">Mis Marcas</h4>
@@ -97,32 +109,31 @@
             </div>
 
             <div id="seccion-publicadores" class="card card-custom p-4 mb-4" style="display: none;">
-    <h4 class="fw-bold">Gestión de Publicadores</h4>
-    <p class="text-muted small">Registra los datos de tu equipo de trabajo.</p>
-    
-    <form id="formAddPublisher" class="mb-4 p-3 bg-light rounded shadow-sm">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="small fw-bold">Nombre Completo</label>
-                <input type="text" id="pubNombre" class="form-control" placeholder="Ej: Juan Pérez" required>
+                <h4 class="fw-bold">Gestión de Publicadores</h4>
+                <p class="text-muted small">Registra los datos de tu equipo de trabajo.</p>
+                <form id="formAddPublisher" class="mb-4 p-3 bg-light rounded shadow-sm">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="small fw-bold">Nombre Completo</label>
+                            <input type="text" id="pubNombre" class="form-control" placeholder="Ej: Juan Pérez" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small fw-bold">Correo Electrónico</label>
+                            <input type="email" id="pubEmail" class="form-control" placeholder="juan@empresa.com" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="small fw-bold">Contraseña Provisional</label>
+                            <input type="password" id="pubPass" class="form-control" placeholder="Mínimo 6 caracteres" required>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">
+                                <i class="bi bi-person-plus-fill me-2"></i>Crear Publicador
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                <div id="listaPublishers"></div>
             </div>
-            <div class="col-md-4">
-                <label class="small fw-bold">Correo Electrónico</label>
-                <input type="email" id="pubEmail" class="form-control" placeholder="juan@empresa.com" required>
-            </div>
-            <div class="col-md-4">
-                <label class="small fw-bold">Contraseña Provisional</label>
-                <input type="password" id="pubPass" class="form-control" placeholder="Mínimo 6 caracteres" required>
-            </div>
-            <div class="col-12 text-end">
-                <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">
-                    <i class="bi bi-person-plus-fill me-2"></i>Crear Publicador
-                </button>
-            </div>
-        </div>
-    </form>
-    <div id="listaPublishers"></div>
-</div>
             
         </div>
     </div>
@@ -133,12 +144,11 @@
 
 <script>
     const usuario = JSON.parse(localStorage.getItem('usuario'));
+    let archivoFotoSeleccionado = null; // Variable para almacenar la imagen seleccionada
 
     document.addEventListener('DOMContentLoaded', () => {
         if (!usuario) { window.location.href = 'login.html'; return; }
 
-        // BLOQUEO DE SEGURIDAD: Solo CORPORATION puede estar en esta página de gestión
-        // Si es un PUBLISHER o MARKET, se envia fuera
         if (usuario.tipoUsuario !== 'CORPORATION') {
             Swal.fire({
                 icon: 'error',
@@ -154,21 +164,28 @@
         cargarMenu();
         
         // Rellenar campos de texto
-            document.getElementById('nombreUsuario').value = usuario.nombre;
-            document.getElementById('nombreLateral').innerText = usuario.nombre;
-            document.getElementById('rolBadge').innerText = usuario.tipoUsuario;
-            
-            const elTiendaLateral = document.getElementById('tiendaLateral');
-            if (elTiendaLateral) {
-                elTiendaLateral.innerText = usuario.nombreTienda || "Sin Tienda";
-            }
+        document.getElementById('nombreUsuario').value = usuario.nombre;
+        document.getElementById('nombreLateral').innerText = usuario.nombre;
+        document.getElementById('rolBadge').innerText = usuario.tipoUsuario;
+        
+        // LÓGICA PARA MOSTRAR FOTO DE PERFIL SI EXISTE
+        if (usuario.fotoPerfil) {
+            const imgEl = document.getElementById('imgPerfilLateral');
+            const iconEl = document.getElementById('iconoPerfilLateral');
+            imgEl.src = 'http://localhost:8080/uploads/' + usuario.fotoPerfil; // Ajusta esta ruta a tu servidor
+            imgEl.classList.remove('d-none');
+            iconEl.classList.add('d-none');
+        }
+        
+        const elTiendaLateral = document.getElementById('tiendaLateral');
+        if (elTiendaLateral) {
+            elTiendaLateral.innerText = usuario.nombreTienda || "Sin Tienda";
+        }
 
-        // Nombre de la corporation en la mitad de la barra superior
-            const elTiendaCentral = document.getElementById('tiendaCentral');
-            if (elTiendaCentral) {
-                elTiendaCentral.innerText = usuario.nombreTienda || "";
-            }
-
+        const elTiendaCentral = document.getElementById('tiendaCentral');
+        if (elTiendaCentral) {
+            elTiendaCentral.innerText = usuario.nombreTienda || "";
+        }
 
         if (usuario.tipoUsuario === 'CORPORATION' || usuario.tipoUsuario === 'PUBLISHER') {
             document.getElementById('seccionCorporativa').style.display = 'block';
@@ -180,17 +197,76 @@
         }
     });
 
+    // Nueva función para previsualizar la foto antes de guardarla
+    function previsualizarFoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            archivoFotoSeleccionado = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgEl = document.getElementById('imgPerfilLateral');
+                const iconEl = document.getElementById('iconoPerfilLateral');
+                imgEl.src = e.target.result;
+                imgEl.classList.remove('d-none');
+                iconEl.classList.add('d-none');
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Nueva función para enviar los datos del perfil actualizados al backend
+   async function actualizarPerfil() {
+    const passwordNuevo = document.getElementById('password').value;
+    const formData = new FormData();
+    
+    if (passwordNuevo) formData.append('password', passwordNuevo);
+    if (archivoFotoSeleccionado) formData.append('foto', archivoFotoSeleccionado);
+
+    if (!passwordNuevo && !archivoFotoSeleccionado) {
+        Swal.fire('Atención', 'No hay cambios para guardar.', 'info');
+        return;
+    }
+
+    try {
+        const res = await fetch(`http://localhost:8080/api/v1/usuarios/${usuario.id}/actualizar`, {
+            method: 'PUT',
+            body: formData
+        });
+
+        if (res.ok) {
+            const usuarioActualizado = await res.json(); // Obtenemos el objeto actualizado del backend
+            
+            // --- AQUÍ ESTÁ LA CLAVE ---
+            // Fusionamos los datos nuevos con los viejos para no perder el nombre o id
+            const nuevoUsuario = { ...usuario, ...usuarioActualizado };
+            localStorage.setItem('usuario', JSON.stringify(nuevoUsuario));
+            // ---------------------------
+
+            Swal.fire('¡Éxito!', 'Perfil actualizado correctamente', 'success').then(() => {
+                location.reload(); // Ahora al recargar, localStorage tendrá la foto nueva
+            });
+        } else {
+            Swal.fire('Error', 'No se pudo actualizar el perfil', 'error');
+        }
+    } catch (error) {
+        Swal.fire('Error', 'No hay conexión con el servidor', 'error');
+    }
+}
+
+
+
     function cargarMenu() {
         const menuContainer = document.getElementById('menuUsuario');
         menuContainer.innerHTML = `
            <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
                     <div class="text-end me-2 d-none d-sm-block">
-
                         <div class="fw-bold" style="font-size: 0.85rem;">${usuario.nombre}</div>
                         <small class="opacity-75" style="font-size: 0.7rem;">${usuario.tipoUsuario}</small>
                     </div>
-                    <i class="bi bi-person-circle fs-3"></i>
+                    ${usuario.fotoPerfil 
+                        ? `<img src="http://localhost:8080/uploads/${usuario.fotoPerfil}" class="rounded-circle" style="width:35px;height:35px;object-fit:cover;">` 
+                        : `<i class="bi bi-person-circle fs-3"></i>`}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
                     <li><h6 class="dropdown-header text-primary fw-bold">${usuario.nombreTienda || 'Badena Usuario'}</h6></li>
@@ -210,21 +286,17 @@
     }
 
     function mostrarSeccion(id) {
+        if ((id === 'publicadores' || id === 'marcas') && usuario.tipoUsuario !== 'CORPORATION') {
+            console.warn("Intento de acceso no autorizado a:", id);
+            return; 
+        }
 
-        // verificacion y bloque de paginas segun roll
-            if ((id === 'publicadores' || id === 'marcas') && usuario.tipoUsuario !== 'CORPORATION') {
-                console.warn("Intento de acceso no autorizado a:", id);
-                return; 
-            }
-
-        // Ocultar todas las secciones
         ['perfil', 'marcas', 'publicadores'].forEach(s => {
             document.getElementById(`seccion-${s}`).style.display = 'none';
             const btn = document.getElementById(`btn-${s}`);
             if(btn) btn.classList.remove('active');
         });
 
-        // Mostrar seccinn elegida y activar boton
         document.getElementById(`seccion-${id}`).style.display = 'block';
         document.getElementById(`btn-${id}`).classList.add('active');
 
@@ -232,7 +304,7 @@
         if (id === 'publicadores') cargarPublishers();
     }
 
-    // cargar las marcas
+    // Funciones cargarMarcas, nuevaMarca, cargarPublishers se mantienen igual ...
     async function cargarMarcas() {
         try {
             const res = await fetch(`http://localhost:8080/api/v1/marcas/tienda/${usuario.idTienda}`);
@@ -253,7 +325,6 @@
         } catch (e) { console.error(e); }
     }
 
-    // funcion para nueva marca
     async function nuevaMarca() {
         const { value: nombre } = await Swal.fire({
             title: 'Nombre de la nueva marca',
@@ -275,7 +346,6 @@
         }
     }
 
-    // Cargar el listado de Publishers
     async function cargarPublishers() {
         try {
             const res = await fetch(`http://localhost:8080/api/v1/usuarios/tienda/${usuario.idTienda}/publishers`);
@@ -318,38 +388,34 @@
         }
     }
 
-    // Guardar el nuevo publisher        
-            document.getElementById('formAddPublisher').addEventListener('submit', async (e) => {
-                e.preventDefault(); 
+    document.getElementById('formAddPublisher').addEventListener('submit', async (e) => {
+        e.preventDefault(); 
+        const payload = {
+            nombre: document.getElementById('pubNombre').value,
+            email: document.getElementById('pubEmail').value,
+            password: document.getElementById('pubPass').value,
+            idTienda: usuario.idTienda 
+        };
 
-                const payload = {
-                    nombre: document.getElementById('pubNombre').value,
-                    email: document.getElementById('pubEmail').value,
-                    password: document.getElementById('pubPass').value,
-                    idTienda: usuario.idTienda 
-                };
-
-                try {
-                    const res = await fetch('http://localhost:8080/api/v1/usuarios/crear-publisher', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (res.ok) {
-                        Swal.fire('¡Creado!', 'El publicador se ha registrado con éxito.', 'success');
-                        document.getElementById('formAddPublisher').reset();
-                        cargarPublishers(); 
-                    } else {
-                        const data = await res.json();
-                        Swal.fire('Error', data.error || 'No se pudo crear', 'error');
-                    }
-                } catch (error) {
-                    Swal.fire('Error', 'No hay conexión con el servidor', 'error');
-                }
+        try {
+            const res = await fetch('http://localhost:8080/api/v1/usuarios/crear-publisher', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
 
-
+            if (res.ok) {
+                Swal.fire('¡Creado!', 'El publicador se ha registrado con éxito.', 'success');
+                document.getElementById('formAddPublisher').reset();
+                cargarPublishers(); 
+            } else {
+                const data = await res.json();
+                Swal.fire('Error', data.error || 'No se pudo crear', 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'No hay conexión con el servidor', 'error');
+        }
+    });
 
 </script>
 </body>
