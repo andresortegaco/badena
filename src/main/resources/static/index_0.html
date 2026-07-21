@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Badena</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --badena-blue: #0d47a1;
+            --badena-dark: #1a237e;
+        }
+
+        body { font-family: 'Inter', sans-serif; color: #333; }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--badena-dark) 0%, var(--badena-blue) 100%);
+            color: white;
+            padding: 100px 0;
+            clip-path: ellipse(150% 100% at 50% 0%);
+        }
+
+        /* Logo Sections */
+        .section-title {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--badena-dark);
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            width: 60px;
+            height: 4px;
+            background: var(--badena-blue);
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .logo-card {
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 50%; /* Hecho circular para las fotos de perfil */
+            padding: 5px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 140px;
+            width: 140px;
+            filter: grayscale(100%);
+            opacity: 0.8;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo-card:hover {
+            filter: grayscale(0%);
+            opacity: 1;
+            box-shadow: 0 10px 20px rgba(13, 110, 253, 0.2);
+            transform: translateY(-5px);
+            border-color: var(--badena-blue);
+        }
+
+        .logo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        /* NUEVO: Estilos para el carrusel de desplazamiento horizontal */
+        .fabricantes-carousel {
+            display: flex;
+            gap: 2rem;
+            overflow-x: auto;
+            padding: 20px 10px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none; /* Firefox */
+            justify-content: flex-start;
+        }
+        
+        /* Centrar el carrusel si hay pocos elementos */
+        @media (min-width: 768px) {
+            .fabricantes-carousel {
+                justify-content: center;
+            }
+        }
+
+        .fabricantes-carousel::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .fabricantes-carousel .logo-card {
+            scroll-snap-align: center;
+            flex-shrink: 0;
+        }
+
+        /* Footer */
+        footer {
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            padding: 60px 0 20px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-transparent position-absolute w-100">
+    <div class="container">
+        <a class="navbar-brand fw-bold fs-3" href="#"><i class="bi bi-journal-bookmark-fill me-2"></i>Badena</a>
+        <div class="ms-auto">
+            <a href="login.html" class="btn btn-outline-light rounded-pill px-4">Acceso Partners</a>
+            <a href="market.html" class="btn btn-light rounded-pill px-4 ms-2">Explorar Market</a>
+        </div>
+    </div>
+</nav>
+
+<header class="hero-section text-center">
+    <div class="container">
+        <h1 class="display-3 fw-bold mb-4 mt-5">Conectando Marcas con el Mundo</h1>
+        <p class="lead mb-5 opacity-75">El showroom digital de productos más avanzado para la integración vía APIs y visualización global.</p>
+        <div class="d-flex justify-content-center gap-3">
+            <div class="text-white text-center px-4 border-end">
+                <h3 class="fw-bold mb-0">+50</h3>
+                <small class="text-uppercase">Fabricantes</small>
+            </div>
+            <div class="text-white text-center px-4 border-end">
+                <h3 class="fw-bold mb-0">+200</h3>
+                <small class="text-uppercase">Marcas</small>
+            </div>
+            <div class="text-white text-center px-4">
+                <h3 class="fw-bold mb-0">+10k</h3>
+                <small class="text-uppercase">Productos</small>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section class="py-5 mt-5">
+    <div class="container">
+        <h2 class="text-center section-title">Fabricantes Aliados</h2>
+        <!-- CONTENEDOR MODIFICADO PARA EL CARRUSEL -->
+        <div class="fabricantes-carousel" id="carouselFabricantes">
+            <div class="w-100 text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center section-title">Marcas Destacadas</h2>
+        <!-- CONTENEDOR DINÁMICO PARA LAS MARCAS -->
+        <div class="row g-4 justify-content-center" id="gridMarcas">
+            <div class="col-12 text-center py-3">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Cargando marcas...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 text-center">
+    <div class="container py-5 border-top">
+        <h2 class="fw-bold mb-4">Accede a nuestro Directorio Universal</h2>
+        <p class="mb-4 text-muted">Alimente su e-commerce con información técnica y comercial oficial, automáticamente con nuestra API gratuita.</p>
+        <a href="market.html" class="btn btn-primary btn-lg rounded-pill px-5 shadow">Ir al Showroom Digital</a>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <h5 class="fw-bold mb-3">BADENA</h5>
+                <p class="small text-muted">Directorio de Productos y Showroom Digital para la conexión empresarial mediante tecnologías modernas.</p>
+            </div>
+            <div class="col-md-2 ms-auto">
+                <h6 class="fw-bold">Explorar</h6>
+                <ul class="list-unstyled small">
+                    <li><a href="market.html" class="text-decoration-none text-muted">Market</a></li>
+                    <li><a href="#" class="text-decoration-none text-muted">Fabricantes</a></li>
+                    <li><a href="#" class="text-decoration-none text-muted">Marcas</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h6 class="fw-bold">Soporte</h6>
+                <ul class="list-unstyled small">
+                    <li><a href="#" class="text-decoration-none text-muted">Documentación API</a></li>
+                    <li><a href="#" class="text-decoration-none text-muted">Contacto</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="text-center pt-4 border-top">
+            <small class="text-muted">&copy; 2026 Badena Project. Todos los derechos reservados.</small>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        cargarFabricantes();
+        cargarMarcasDestacadas();
+    });
+
+    async function cargarFabricantes() {
+        try {
+            const res = await fetch('http://localhost:8080/api/v1/usuarios/corporations');
+            const contenedor = document.getElementById('carouselFabricantes');
+
+            if (!res.ok) {
+                contenedor.innerHTML = '<p class="text-center w-100 text-danger">Error al cargar los fabricantes.</p>';
+                return;
+            }
+
+            const usuarios = await res.json();
+            
+            // Filtramos solo los usuarios que tienen una foto de perfil asignada
+            const fabricantesConFoto = usuarios.filter(u => u.fotoPerfil != null);
+
+            if (fabricantesConFoto.length === 0) {
+                contenedor.innerHTML = '<p class="text-center w-100 text-muted">Próximamente nuevos aliados...</p>';
+                return;
+            }
+
+            // Generamos las tarjetas circulares para el carrusel
+            contenedor.innerHTML = fabricantesConFoto.map(u => `
+                <div class="logo-card" title="${u.nombreTienda || u.nombre}">
+                    <img src="http://localhost:8080/uploads/${u.fotoPerfil}" alt="${u.nombre}">
+                </div>
+            `).join('');
+
+        } catch (error) {
+            console.error("Error cargando fabricantes:", error);
+            document.getElementById('carouselFabricantes').innerHTML = '<p class="text-center w-100 text-muted">No se pudo conectar con el servidor.</p>';
+        }
+    }
+
+
+    // NUEVA FUNCIÓN PARA CARGAR LAS MARCAS DESTACADAS CON SUS FOTOS
+    async function cargarMarcasDestacadas() {
+        try {
+            const res = await fetch('http://localhost:8080/api/v1/marcas');
+            const grid = document.getElementById('gridMarcas');
+
+            if (!res.ok) {
+                grid.innerHTML = '<p class="text-center w-100 text-danger">Error al cargar las marcas.</p>';
+                return;
+            }
+
+            const marcas = await res.json();
+            
+            // Filtramos únicamente las marcas que tengan un archivo de logo registrado
+            const marcasConLogo = marcas.filter(m => m.logo != null && m.logo.trim() !== '');
+
+            if (marcasConLogo.length === 0) {
+                grid.innerHTML = '<p class="text-center w-100 text-muted">Próximamente marcas destacadas...</p>';
+                return;
+            }
+
+            // Generamos las tarjetas de forma responsiva en la grilla
+            grid.innerHTML = marcasConLogo.map(m => `
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2 d-flex justify-content-center">
+                    <div class="logo-card shadow-sm" style="border-radius: 15px; height: 110px; width: 110px;" title="${m.nombre}">
+                        <img src="http://localhost:8080/uploads/${m.logo}" alt="${m.nombre}" style="border-radius: 12px; object-fit: cover;">
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (error) {
+            console.error("Error cargando marcas destacadas:", error);
+            document.getElementById('gridMarcas').innerHTML = '<p class="text-center w-100 text-muted">No se pudo conectar con el servidor.</p>';
+        }
+}
+
+</script>
+</body>
+</html>
