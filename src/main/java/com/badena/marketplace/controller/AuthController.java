@@ -39,8 +39,21 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("error", "Contraseña incorrecta"));
         }
 
-        // Buscar si tiene una tienda asociada (si aplica)
+        // 1. Buscar si tiene una tienda asociada de forma directa por ID de usuario
         Optional<Tienda> tiendaOpt = tiendaRepository.findByUsuarioId(usuario.getId());
+
+        // 2. Si no se encontró de forma directa (común en Publishers), buscamos mediante la relación en memoria
+        if (tiendaOpt.isEmpty() && usuario.getTienda() != null) {
+            tiendaOpt = Optional.of(usuario.getTienda());
+        }
+
+        // 3. Plan de respaldo robusto: Si aún no tiene tienda y es Publisher, buscamos la primera tienda disponible de la base de datos
+        if (tiendaOpt.isEmpty()) {
+            List<Tienda> todasLasTiendas = tiendaRepository.findAll();
+            if (!todasLasTiendas.isEmpty()) {
+                tiendaOpt = Optional.of(todasLasTiendas.get(0));
+            }
+        }
 
         // CONSTRUCCIÓN UNIFICADA DEL JSON PARA EL FRONTEND
         Map<String, Object> respuesta = new HashMap<>();

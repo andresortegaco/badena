@@ -61,14 +61,17 @@ public class ProductoController {
         return ResponseEntity.ok(productoRepository.findAll());
     }
 
-    // mostrar por tienda, perfil (Dashboard).
+// mostrar por tienda, perfil (Dashboard).
     @GetMapping("/tienda/{tiendaId}")
     public ResponseEntity<List<Producto>> listarPorTienda(@PathVariable Long tiendaId) {
-        List<Producto> productos = productoRepository.findByTiendaId(tiendaId);
+        // Usamos la consulta optimizada por la relación de la marca de la tienda
+        List<Producto> productos = productoRepository.findByMarca_Tienda_Id(tiendaId);
         
         return ResponseEntity.ok(productos);
     }
 
+
+    
      // Llamar elos dellates por EAN.
    @GetMapping("/{codigoUniversal}")
     public ResponseEntity<?> obtenerProductoPorCodigo(@PathVariable String codigoUniversal) {

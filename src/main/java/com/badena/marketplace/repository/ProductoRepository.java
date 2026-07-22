@@ -16,19 +16,15 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
     @Query("SELECT COUNT(p) FROM Producto p WHERE p.marca.tienda.id = :idTienda")
     long contarProductosDeMiTienda(@Param("idTienda") Long idTienda);
 
-
-
+    // MÉTODOS DE BÚSQUEDA DE PRODUCTOS POR TIENDA (Asegúrate de tener ambos)
     List<Producto> findByTiendaId(Long tiendaId);
+    
+    List<Producto> findByMarca_Tienda_Id(Long idTienda); // <--- Asegúrate que esta línea exista
 
     List<Producto> findByNombreProductoContainingIgnoreCase(String nombre);
-
-
-
 
     List<Producto> findByNombreProductoContainingIgnoreCaseOrCodigoUniversalContainingIgnoreCase(
         String nombre, String codigoUniversal);
 
-        Optional<Producto> findByCodigoUniversal(String codigoUniversal);
-
-
+    Optional<Producto> findByCodigoUniversal(String codigoUniversal);
 }

@@ -33,7 +33,7 @@ function actualizarMenuUsuario(tipoVista) {
 
         const nombreDisp = usuario.nombre || "Usuario";
         const tipoDisp = usuario.tipoUsuario || "MARKET";
-        const tiendaDisp = usuario.nombreTienda || "Mi Tienda";
+        const tiendaDisp = usuario.nombreTienda || (usuario.tienda ? usuario.tienda.nombre : "Mi Tienda");
         const esCorporacion = tipoDisp === 'CORPORATION';
         const esPublicador = tipoDisp === 'PUBLISHER';
 
