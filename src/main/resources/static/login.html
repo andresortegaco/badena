@@ -10,16 +10,25 @@
     <style>
         body { background-color: #f8f9fa; min-height: 100vh; display: flex; align-items: center; }
         .card-login { border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: none; }
-        .btn-login { background-color: #0d6efd; border-radius: 50px; padding: 12px; font-weight: 600; }
+        .btn-login { background-color: #0d6efd; border-radius: 50px; padding: 12px; font-weight: 600; transition: all 0.3s; }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3); }
         .form-icon { color: #6c757d; }
+        .back-link { color: #adb5bd; transition: 0.3s; }
+        .back-link:hover { color: #0d6efd; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="loginContainer" style="display: none;">
     <div class="row justify-content-center">
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card card-login p-4">
+        <div class="col-12 col-md-6 col-lg-5">
+            <div class="card card-login p-4 p-md-5">
+                
+                <!-- Enlace para regresar al inicio -->
+                <a href="index.html" class="text-decoration-none back-link mb-4 d-inline-block fw-medium" style="font-size: 0.9rem;">
+                    <i class="fa fa-arrow-left me-2"></i>Volver al inicio
+                </a>
+
                 <div class="text-center mb-4">
                     <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
                         <i class="fa fa-lock fa-2x"></i>
@@ -30,27 +39,63 @@
 
                 <form id="loginForm">
                     <div class="mb-3">
-                        <label class="form-label"><i class="fa fa-envelope form-icon me-2"></i>Correo Electrónico</label>
-                        <input type="email" class="form-control form-control-lg" id="email" placeholder="nombre@correo.com" required>
+                        <label class="form-label fw-bold"><i class="fa fa-envelope form-icon me-2"></i>Correo Electrónico</label>
+                        <input type="email" class="form-control form-control-lg bg-light" id="email" placeholder="nombre@correo.com" required>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label"><i class="fa fa-key form-icon me-2"></i>Contraseña</label>
-                        <input type="password" class="form-control form-control-lg" id="password" placeholder="••••••••" required>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label fw-bold mb-0"><i class="fa fa-key form-icon me-2"></i>Contraseña</label>
+                            <!-- Opción de recuperar contraseña -->
+                            <a href="#" class="text-decoration-none small fw-medium" onclick="recuperarPassword()">¿Olvidaste tu clave?</a>
+                        </div>
+                        <input type="password" class="form-control form-control-lg bg-light" id="password" placeholder="••••••••" required>
                     </div>
 
-                    <div class="d-grid mb-3">
+                    <div class="d-grid mb-4">
                         <button type="submit" class="btn btn-primary btn-login">
                             <i class="fa fa-sign-in-alt me-2"></i>Entrar
                         </button>
                     </div>
                 </form>
+
+                <!-- Enlace para registrarse -->
+                <div class="text-center pt-3 border-top">
+                    <p class="text-muted mb-0">¿No tienes una cuenta? 
+                        <a href="registro.html" class="text-decoration-none fw-bold ms-1">Regístrate aquí</a>
+                    </p>
+                </div>
+                
             </div>
         </div>
     </div>
 </div>
 
 <script>
+// Validar sesión activa al cargar la página
+document.addEventListener("DOMContentLoaded", () => {
+    const usuarioGuardado = localStorage.getItem('usuario');
+    
+    if (usuarioGuardado) {
+        const data = JSON.parse(usuarioGuardado);
+        redireccionarSegunRol(data);
+    } else {
+        // Mostrar el formulario solo si NO hay sesión
+        document.getElementById('loginContainer').style.display = 'block';
+    }
+});
+
+// Función centralizada para redirecciones
+function redireccionarSegunRol(data) {
+    if (data.tipo === 'ADMIN') {
+        window.location.href = "admin-dashboard.html";
+    } else if (data.tipoUsuario === 'CORPORATION' || data.tipoUsuario === 'PUBLISHER') {
+        window.location.href = "dashboard-productos.html"; 
+    } else {
+        window.location.href = "market.html";
+    }
+}
+
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -60,7 +105,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     };
 
     try {
-        // CORREGIDO: Apunta al endpoint correcto de AuthController
         const respuesta = await fetch('http://localhost:8080/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -78,14 +122,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
                 showConfirmButton: false,
                 timer: 1500
             }).then(() => {
-                // REDIRECCIÓN SEGÚN EL ROL DEL USUARIO
-                if (data.tipo === 'ADMIN') {
-                    window.location.href = "admin-dashboard.html";
-                } else if (data.tipoUsuario === 'CORPORATION' || data.tipoUsuario === 'PUBLISHER') {
-                    window.location.href = "dashboard-productos.html"; 
-                } else {
-                    window.location.href = "market.html";
-                }
+                redireccionarSegunRol(data);
             });
             
         } else {
@@ -105,6 +142,35 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         });
     }
 });
+
+// Función de interfaz para recuperar la contraseña
+function recuperarPassword() {
+    Swal.fire({
+        title: 'Recuperar Contraseña',
+        text: 'Ingresa el correo asociado a tu cuenta y te enviaremos instrucciones para restablecer tu clave.',
+        input: 'email',
+        inputPlaceholder: 'tu@correo.com',
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa fa-paper-plane me-2"></i>Enviar enlace',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#0d6efd',
+        cancelButtonColor: '#6c757d',
+        inputValidator: (value) => {
+            if (!value) {
+                return '¡Necesitas escribir un correo válido!'
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            // Aquí puedes conectar el fetch a tu backend en el futuro
+            Swal.fire({
+                icon: 'success',
+                title: '¡Correo enviado!',
+                text: 'Si el correo existe en nuestro sistema, recibirás un enlace de recuperación pronto. No olvides revisar tu carpeta de SPAM.'
+            });
+        }
+    });
+}
 </script>
 
 </body>
