@@ -14,18 +14,11 @@
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
-    <div class="container position-relative"> <a class="navbar-brand fw-bold" href="market.html">Badena Catálogo</a>
-        <div class="d-none d-md-block position-absolute start-50 translate-middle-x">
-            <span class="navbar-text text-white fw-bold fs-4 text-uppercase" id="tiendaCentral" style="letter-spacing: 1.5px;"></span>
-        </div>    
-        <div class="ms-auto">
-            <a href="market.html" class="btn btn-outline-light btn-sm rounded-pill px-3">Volver al Market</a>
-        </div>
-    </div>
-</nav>
+<!-- Navbar modo DASHBOARD (Oculta buscador, muestra nombre en el centro) -->
+<div id="navbar-placeholder" data-tipo="dashboard"></div>
+<script src="js/navbar-loader.js"></script>
 
-<div class="container mb-5">
+<div class="container mb-5 mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="profile-header p-5 mb-4 text-center shadow">
@@ -73,18 +66,17 @@
     </div>
 </div>
 
+<!-- ESTE SCRIPT ES OBLIGATORIO PARA QUE FUNCIONE EL MENÚ DESPLEGABLE -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     const usuario = JSON.parse(localStorage.getItem('usuario'));
 
     document.addEventListener("DOMContentLoaded", () => {
         if (!usuario) { window.location.href = 'login.html'; return; }
 
-        // id de Tienda
-        const elTiendaCentral = document.getElementById('tiendaCentral');
-        if (elTiendaCentral) { elTiendaCentral.innerText = usuario.nombreTienda || ""; }
-
-        // Datos del usuario
+        // Datos del usuario (el navbar ya maneja tiendaCentral de forma global)
         document.getElementById('userName').innerText = usuario.nombre;
         document.getElementById('displayUser').innerText = usuario.nombreUsuario;
         document.getElementById('userRole').innerText = usuario.tipoUsuario;

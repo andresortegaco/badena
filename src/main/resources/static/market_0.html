@@ -36,9 +36,30 @@
 </head>
 <body class="bg-light">
 
-<!-- Navbar Centralizado -->
-<div id="navbar-placeholder"></div>
-<script src="js/navbar-loader.js"></script>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top mb-4 shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
+            <i class="bi bi-journal-bookmark-fill me-2"></i>Badena
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <form class="d-flex mx-auto w-50 my-2 my-lg-0">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="inputBuscador" class="form-control" placeholder="Buscar por nombre o código de barras ...">
+                    <button class="btn btn-dark" type="button">Buscar</button>
+                </div>
+            </form>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-2" id="menuUsuario">
+            </ul>
+        </div>
+    </div>
+</nav>
 
 
 <div class="container mb-5">
@@ -71,9 +92,76 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
+        actualizarMenuUsuario();
         cargarCatalogo();
     });
 
+    function actualizarMenuUsuario() {
+        const usuarioJson = localStorage.getItem('usuario');
+        const menuUsuario = document.getElementById('menuUsuario');
+        
+        if (usuarioJson) {
+            const usuario = JSON.parse(usuarioJson);
+
+            const nombreDisp = usuario.nombre || "Usuario";
+            const tipoDisp = usuario.tipoUsuario || "MARKET";
+            const tiendaDisp = usuario.nombreTienda || "Mi Tienda";
+            const esCorporacion = tipoDisp === 'CORPORATION';
+            const esPublicador = tipoDisp === 'PUBLISHER';
+
+            let html = '';
+
+            if (esCorporacion) {
+                html += `
+                <li class="nav-item">
+                    <a class="btn btn-warning btn-sm me-3 fw-bold shadow-sm rounded-pill px-3" href="add_product.html">
+                        <i class="bi bi-plus-circle-fill me-1"></i>Publicar
+                    </a>
+                </li>`;
+            }
+
+            html += `
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                    <div class="text-end me-2 d-none d-sm-block" style="line-height: 1.2;">
+                        <div class="fw-bold" style="font-size: 0.9rem;">${nombreDisp}</div>
+                        <small class="opacity-75" style="font-size: 0.75rem;">${tipoDisp}</small>
+                    </div>
+                    <i class="bi bi-person-circle fs-3"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 mt-2">
+                    ${esPublicador || esCorporacion ? `
+                        <li><h6 class="dropdown-header text-primary"><i class="bi bi-shop me-2"></i>${tiendaDisp}</h6></li>
+                        <li><a class="dropdown-item" href="dashboard-productos.html"><i class="bi bi-grid-3x3-gap me-2"></i>Mi Inventario</a></li>
+                        <li><a class="dropdown-item" href="add_product.html"><i class="bi bi-plus-square me-2"></i>Agregar Producto</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                    ` : ''}
+                    <li><a class="dropdown-item" href="/perfil.html"><i class="bi bi-person-vcard me-2"></i>Mi Perfil..</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger fw-bold" href="#" onclick="logout()">
+                            <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                        </a>
+                    </li>
+                </ul>
+            </li>`;
+
+            menuUsuario.innerHTML = html;
+        } else {
+            menuUsuario.innerHTML = `
+                <li class="nav-item">
+                    <a class="nav-link text-white fw-medium" href="login.html">Iniciar Sesión</a>
+                </li>
+                <li class="nav-item">
+                    <a class="btn btn-outline-light btn-sm fw-bold px-3 rounded-pill" href="registro.html">Crear Cuenta</a>
+                </li>`;
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('usuario');
+        window.location.reload();
+    }
 
     function cargarCatalogo() {
         fetch('http://localhost:8080/api/v1/productos')
@@ -127,17 +215,9 @@
         window.location.href = `product.html?cod=${codigo}`;
     }
 
-    // AGREGAR ESTO EN market.html (Delegación de eventos segura)
-    document.addEventListener('input', (e) => {
-        if (e.target && e.target.id === 'inputBuscador') {
-            const termino = e.target.value.trim();
-            if (termino.length >= 3) {
-                ejecutarBusqueda(termino);
-            } else if (termino.length === 0) {
-                cargarCatalogo();
-            }
-        }
-    });
+    const buscador = document.getElementById('inputBuscador');
+
+    buscador.addEventListener('input', (e) => {
         const termino = e.target.value.trim();
 
         if (termino.length >= 3) {
@@ -145,7 +225,7 @@
         } else if (termino.length === 0) {
             cargarCatalogo();
         }
-    
+    });
 
     async function ejecutarBusqueda(query) {
         try {

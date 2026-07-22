@@ -1,0 +1,32 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top mb-4 shadow-sm">
+    <div class="container position-relative">
+        <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
+            <i class="bi bi-journal-bookmark-fill me-2"></i>Badena
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- TÍTULO CENTRAL PARA DASHBOARD (Oculto por defecto) -->
+        <div id="navTituloCentral" class="d-none position-absolute start-50 translate-middle-x" style="top: 15px;">
+            <span class="navbar-text text-white fw-bold fs-4 text-uppercase" id="textoTituloCentral" style="letter-spacing: 1.5px;"></span>
+        </div>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            
+            <!-- BUSCADOR DEL MARKET (Visible por defecto) -->
+            <form class="d-flex mx-auto w-50 my-2 my-lg-0" id="navBuscadorContainer">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                    <input type="text" id="inputBuscador" class="form-control" placeholder="Buscar por nombre o código de barras ...">
+                    <button class="btn btn-dark" type="button">Buscar</button>
+                </div>
+            </form>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-2" id="menuUsuario">
+                <!-- Se inyecta dinámicamente -->
+            </ul>
+        </div>
+    </div>
+</nav>
